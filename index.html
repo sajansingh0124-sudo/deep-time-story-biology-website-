@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chrono-Log: Journey Through Deep Time | General Biology 2</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0b0f17;
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+        h1, h2, h3, .font-cinzel {
+            font-family: 'Cinzel', serif;
+        }
+        .card-glass {
+            background: rgba(18, 24, 38, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+        }
+        .hero-gradient {
+            background: radial-gradient(circle at 80% 10%, rgba(245, 158, 11, 0.12), transparent 40%),
+                        radial-gradient(circle at 10% 90%, rgba(99, 102, 241, 0.12), transparent 40%),
+                        radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.05), transparent 60%);
+        }
+
+        /* Equalizer Animation for Sound Indicator */
+        .eq-bar {
+            width: 3px;
+            background-color: currentColor;
+            border-radius: 2px;
+            animation: bounce 1s infinite ease-in-out alternate;
+        }
+        .eq-bar:nth-child(1) { height: 16px; animation-delay: 0.1s; }
+        .eq-bar:nth-child(2) { height: 24px; animation-delay: 0.3s; }
+        .eq-bar:nth-child(3) { height: 12px; animation-delay: 0.2s; }
+        .eq-bar:nth-child(4) { height: 20px; animation-delay: 0.4s; }
+
+        @keyframes bounce {
+            0% { transform: scaleY(0.3); }
+            100% { transform: scaleY(1.1); }
+        }
+
+        .paused .eq-bar {
+            animation-play-state: paused;
+            transform: scaleY(0.3);
+        }
+
+        /* Transition FX for page changes */
+        .page-view {
+            transition: opacity 0.25s ease-in-out, transform 0.25s ease-in-out;
+        }
+        .page-hidden {
+            display: none !important;
+            opacity: 0;
+            transform: translateY(12px);
+        }
+        .page-active {
+            display: block !important;
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col hero-gradient selection:bg-amber-500 selection:text-slate-950">
+
+    <!-- TOP NAVIGATION BAR -->
+    <header class="sticky top-0 z-50 card-glass border-b border-slate-800/80">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="flex items-center space-x-3 w-full sm:w-auto justify-between sm:justify-start">
+                <div class="flex items-center space-x-2">
+                    <span class="text-2xl animate-pulse">⏳</span>
+                    <div>
+                        <h1 class="text-base font-black tracking-widest text-amber-400">CHRONO-LOG</h1>
+                        <p class="text-[10px] text-slate-400">Dr. Alex Vance | Deep Time Field Journal</p>
+                    </div>
+                </div>
+                <!-- Mobile Indicator of current chapter -->
+                <span id="current-chapter-badge" class="sm:hidden text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                    00. Mission
+                </span>
+            </div>
+
+            <!-- Page Selection Tabs -->
+            <nav class="flex overflow-x-auto w-full sm:w-auto space-x-1 pb-1 sm:pb-0 text-xs font-semibold scrollbar-none">
+                <button onclick="navigateTo('mission')" id="tab-mission" class="tab-btn px-3 py-1.5 rounded-lg whitespace-nowrap transition-all duration-200">00. Mission</button>
+                <button onclick="navigateTo('precambrian')" id="tab-precambrian" class="tab-btn px-3 py-1.5 rounded-lg whitespace-nowrap transition-all duration-200">01. Precambrian</button>
+                <button onclick="navigateTo('paleozoic')" id="tab-paleozoic" class="tab-btn px-3 py-1.5 rounded-lg whitespace-nowrap transition-all duration-200">02. Paleozoic</button>
+                <button onclick="navigateTo('mesozoic')" id="tab-mesozoic" class="tab-btn px-3 py-1.5 rounded-lg whitespace-nowrap transition-all duration-200">03. Mesozoic</button>
+                <button onclick="navigateTo('cenozoic')" id="tab-cenozoic" class="tab-btn px-3 py-1.5 rounded-lg whitespace-nowrap transition-all duration-200">04. Cenozoic</button>
+                <button onclick="navigateTo('synthesis')" id="tab-synthesis" class="tab-btn px-3 py-1.5 rounded-lg whitespace-nowrap transition-all duration-200">05. Synthesis</button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- MAIN SINGLE-PAGE CONTAINER -->
+    <main class="flex-grow max-w-4xl mx-auto px-4 py-8 w-full">
+
+        <!-- GLOBAL AUDIO PLAYER CONTROL BAR -->
+        <div id="audio-bar" class="card-glass p-4 rounded-2xl mb-8 border border-amber-500/30 flex flex-col md:flex-row items-center justify-between gap-4 shadow-xl">
+            <div class="flex items-center space-x-3 w-full md:w-auto">
+                <div id="eq-indicator" class="flex items-end space-x-1 h-6 px-2 py-1 bg-slate-900 rounded-md border border-slate-700 text-amber-400 paused">
+                    <div class="eq-bar"></div>
+                    <div class="eq-bar"></div>
+                    <div class="eq-bar"></div>
+                    <div class="eq-bar"></div>
+                </div>
+                <div class="overflow-hidden">
+                    <span class="text-[10px] font-bold text-amber-400 uppercase tracking-widest block">AUDIO LOG SYNTHESIZER</span>
+                    <h4 id="audio-title" class="text-xs font-semibold text-slate-200 truncate max-w-[240px] sm:max-w-md">Ready to narrate chapter log...</h4>
+                </div>
+            </div>
+
+            <!-- Speech Audio Controls -->
+            <div class="flex items-center space-x-2 w-full md:w-auto justify-end">
+                <button id="btn-play" onclick="playCurrentChapterAudio()" class="flex-1 md:flex-none px-4 py-2 bg-amber-500 hover:bg-amber-400 active:scale-95 text-slate-950 font-black rounded-xl text-xs flex items-center justify-center space-x-1.5 transition shadow-lg shadow-amber-500/20">
+                    <span>▶</span>
+                    <span id="play-btn-text">LISTEN LOG</span>
+                </button>
+                <button id="btn-stop" onclick="stopAudio()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 rounded-xl text-xs font-bold transition border border-slate-700">
+                    ⏹ STOP
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= PAGE 00: MISSION BRIEFING ================= -->
+        <article id="page-mission" class="page-view space-y-6">
+            <div class="card-glass p-6 md:p-8 rounded-2xl border-l-4 border-amber-500 relative overflow-hidden">
+                <div class="space-y-2">
+                    <span class="text-xs font-bold tracking-widest text-amber-400 uppercase">General Biology 2 Digital Storytelling Project</span>
+                    <h2 class="text-3xl md:text-4xl font-bold text-white">Section 00: Mission Briefing</h2>
+                    <p class="text-xs text-slate-400">Temporal Field Generator Operational • Temporal Coordinates: Present to -4.6 Ga</p>
+                </div>
+
+                <div class="mt-6 space-y-4 text-slate-300 leading-relaxed text-sm md:text-base border-t border-slate-800 pt-6">
+                    <p>
+                        "If you are receiving this transmitted log, our temporal field generator is stabilized. I am <strong class="text-amber-300">Dr. Alex Vance</strong>. We are about to step out of our comfortable era and plunge backward into <strong class="text-amber-300">Deep Time</strong>."
+                    </p>
+                    <p>
+                        "Most students view Earth's ancient history as a static table of memorized dates and stone fossils. But history is not static—it is a colossal, continuous chain reaction. A change in atmospheric gas billions of years ago dictating the air you breathe right now."
+                    </p>
+                    <p>
+                        "Throughout this digital logbook, we will travel across six major checkpoints. We will record 8 pivotal biological milestones, survive 2 catastrophic mass extinctions, and analyze the direct cause-and-effect drivers that built modern planetary biodiversity."
+                    </p>
+                </div>
+
+                <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4 border-t border-slate-800 text-xs">
+                    <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800">
+                        <span class="text-amber-400 font-bold block">👤 Perspective</span>
+                        <span class="text-slate-300">Time Traveler's Field Journal</span>
+                    </div>
+                    <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800">
+                        <span class="text-amber-400 font-bold block">🧬 Key Milestones</span>
+                        <span class="text-slate-300">8 Recorded Evolutionary Events</span>
+                    </div>
+                    <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800">
+                        <span class="text-amber-400 font-bold block">💥 Extinction Crises</span>
+                        <span class="text-slate-300">Permian & K-Pg Disasters</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page Bottom Navigation -->
+            <div class="flex justify-between items-center pt-4">
+                <div></div> <!-- Empty placeholder for alignment -->
+                <button onclick="navigateTo('precambrian')" class="px-6 py-3 bg-amber-500 hover:bg-amber-400 active:scale-95 text-slate-950 font-black rounded-xl text-xs sm:text-sm flex items-center space-x-2 transition shadow-lg shadow-amber-500/20">
+                    <span>CHAPTER 01: PRECAMBRIAN</span>
+                    <span>&rarr;</span>
+                </button>
+            </div>
+        </article>
+
+
+        <!-- ================= PAGE 01: PRECAMBRIAN ERA ================= -->
+        <article id="page-precambrian" class="page-view space-y-6 page-hidden">
+            <div class="card-glass p-6 rounded-2xl border-l-4 border-emerald-500">
+                <span class="text-xs font-bold tracking-widest text-emerald-400 uppercase">Section 01 | Deep Time Eons</span>
+                <h2 class="text-2xl md:text-3xl font-bold mt-1 text-white">The Precambrian Era (~4.6 Ga – 541 Ma)</h2>
+                <p class="text-xs text-slate-400 mt-1">Location: Hadean Volcanic Crust to Proterozoic Primordial Oceans</p>
+            </div>
+
+            <!-- Milestones Container -->
+            <div class="space-y-4">
+                <!-- Milestone #1 -->
+                <div class="card-glass p-5 rounded-xl border border-slate-800 space-y-2 relative">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs bg-emerald-950 text-emerald-300 border border-emerald-800/50 px-3 py-1 rounded-full font-mono font-bold">Milestone #1 • ~3.8 Ga</span>
+                        <span class="text-xs text-slate-400">Prokaryotic Origin</span>
+                    </div>
+                    <h3 class="font-bold text-amber-300 text-lg">Origin of Single-Celled Prokaryotic Life</h3>
+                    <p class="text-sm text-slate-300 leading-relaxed">
+                        "Stepping onto the boiling shoreline, atmospheric sensors register zero free oxygen—predominantly methane, ammonia, and carbon dioxide. Deep in submarine hydrothermal vents, simple lipid membranes encapsulated self-replicating genetic material, forming the first unicellular prokaryotic microbes."
+                    </p>
+                </div>
+
+                <!-- Milestone #2 -->
+                <div class="card-glass p-5 rounded-xl border border-slate-800 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs bg-emerald-950 text-emerald-300 border border-emerald-800/50 px-3 py-1 rounded-full font-mono font-bold">Milestone #2 • ~2.4 Ga</span>
+                        <span class="text-xs text-slate-400">Atmospheric Transformation</span>
+                    </div>
+                    <h3 class="font-bold text-amber-300 text-lg">The Great Oxidation Event (GOE)</h3>
+                    <p class="text-sm text-slate-300 leading-relaxed">
+                        "A revolutionary metabolic breakthrough has occurred! Microscopic cyanobacteria evolved oxygenic photosynthesis. Over centuries, oxygen saturated chemical sinks in ocean iron deposits and flooded the atmosphere, transforming Earth's climate and sky forever."
+                    </p>
+                </div>
+
+                <!-- Cause and Effect #1 -->
+                <div class="bg-emerald-950/40 border border-emerald-500/40 p-5 rounded-xl space-y-2">
+                    <div class="flex items-center space-x-2 text-emerald-400 font-bold text-xs uppercase tracking-wider">
+                        <span>⚡ Evolutionary Cause-and-Effect #1</span>
+                    </div>
+                    <p class="text-sm text-slate-200 leading-relaxed">
+                        <strong class="text-emerald-300">Photosynthetic Activity &rarr; Atmospheric Oxygen Shift &rarr; Aerobic Radiation:</strong> The continuous production of photosynthetic oxygen wiped out ancient obligate anaerobic prokaryotes in a massive die-off, but fundamentally created the high-energy oxidative atmosphere required for complex eukaryotic cells and multicellular organismal body plans.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Page Bottom Navigation -->
+            <div class="flex justify-between items-center pt-4 border-t border-slate-800">
+                <button onclick="navigateTo('mission')" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 font-bold rounded-xl text-xs sm:text-sm flex items-center space-x-2 transition border border-slate-700">
+                    <span>&larr;</span>
+                    <span>BACK: MISSION</span>
+                </button>
+                <button onclick="navigateTo('paleozoic')" class="px-5 py-2.5 bg-amber-500 hover:bg-amber-400 active:scale-95 text-slate-950 font-black rounded-xl text-xs sm:text-sm flex items-center space-x-2 transition shadow-lg shadow-amber-500/20">
+                    <span>NEXT: PALEOZOIC</span>
+                    <span>&rarr;</span>
+                </button>
+            </div>
+        </article>
+
+
+        <!-- ================= PAGE 02: PALEOZOIC ERA ================= -->
+        <article id="page-paleozoic" class="page-view space-y-6 page-hidden">
+            <div class="card-glass p-6 rounded-2xl border-l-4 border-blue-500">
+                <span class="text-xs font-bold tracking-widest text-blue-400 uppercase">Section 02 | Ancient Life</span>
+                <h2 class="text-2xl md:text-3xl font-bold mt-1 text-white">The Paleozoic Era (541 Ma – 252 Ma)</h2>
+                <p class="text-xs text-slate-400 mt-1">Location: Shallow Epicontinental Seas to Coal-Forming Swamp Forests</p>
+            </div>
+
+            <div class="space-y-4">
+                <!-- Milestone #3 -->
+                <div class="card-glass p-5 rounded-xl border border-slate-800 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs bg-blue-950 text-blue-300 border border-blue-800/50 px-3 py-1 rounded-full font-mono font-bold">Milestone #3 • ~541 Ma</span>
+                        <span class="text-xs text-slate-400">Marine Explosion</span>
+                    </div>
+                    <h3 class="font-bold text-amber-300 text-lg">The Cambrian Explosion</h3>
+                    <p class="text-sm text-slate-300 leading-relaxed">
+                        "The ocean floor is teeming with alien anatomical architectures! In a stunningly rapid evolutionary burst, nearly all major animal phyla appeared in the fossil record—including armored trilobites, predatory Anomalocaris, and early chordate ancestors."
+                    </p>
+                </div>
+
+                <!-- Milestone #4 -->
+                <div class="card-glass p-5 rounded-xl border border-slate-800 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs bg-blue-950 text-blue-300 border border-blue-800/50 px-3 py-1 rounded-full font-mono font-bold">Milestone #4 • ~375 Ma</span>
+                        <span class="text-xs text-slate-400">Terristrial Invasion</span>
+                    </div>
+                    <h3 class="font-bold text-amber-300 text-lg">Tetrapod Colonization of Land</h3>
+                    <p class="text-sm text-slate-300 leading-relaxed">
+                        "Observing a muddy Devonian delta, I recorded transitional species like <em>Tiktaalik</em> using muscular lobed fins with wrist bones to haul themselves onto land, paving the way for terrestrial amphibians and amniotes."
+                    </p>
+                </div>
+
+                <!-- Mass Extinction #1 -->
+                <div class="bg-red-950/40 border border-red-500/40 p-5 rounded-xl space-y-2">
+                    <div class="flex items-center justify-between text-red-400 font-bold text-xs uppercase tracking-wider">
+                        <span>💥 Mass Extinction Crisis #1</span>
+                        <span class="font-mono">~252 Ma</span>
+                    </div>
+                    <h3 class="font-bold text-red-300 text-base">The Permian-Triassic Extinction ("The Great Dying")</h3>
+                    <p class="text-sm text-slate-200 leading-relaxed">
+                        Catastrophic volcanic eruptions in the Siberian Traps released massive volumes of carbon dioxide and sulfur, causing runaway global warming, ocean acidification, and marine anoxia. Over 95% of marine species and 70% of terrestrial vertebrate families were completely eradicated.
+                    </p>
+                </div>
+
+                <!-- Cause and Effect #2 -->
+                <div class="bg-blue-950/40 border border-blue-500/40 p-5 rounded-xl space-y-2">
+                    <div class="flex items-center space-x-2 text-blue-400 font-bold text-xs uppercase tracking-wider">
+                        <span>⚡ Evolutionary Cause-and-Effect #2</span>
+                    </div>
+                    <p class="text-sm text-slate-200 leading-relaxed">
+                        <strong class="text-blue-300">Flood Volcanism &rarr; Planetary Climate Collapse &rarr; Niche Reorganization:</strong> The catastrophic climate warming and oceanic dead zones wiped out dominant Paleozoic fauna like trilobites and sea scorpions, clearing open ecological niches for the survival and expansion of archosaurs in the Triassic.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Page Bottom Navigation -->
+            <div class="flex justify-between items-center pt-4 border-t border-slate-800">
+                <button onclick="navigateTo('precambrian')" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 font-bold rounded-xl text-xs sm:text-sm flex items-center space-x-2 transition border border-slate-700">
+                    <span>&larr;</spa
